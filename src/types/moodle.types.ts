@@ -1,6 +1,6 @@
 import winston from "winston";
 
-export type Student = {
+export type MoodleStudent = {
     id: number;
     firstname: string;
     lastname: string;

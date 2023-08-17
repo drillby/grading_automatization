@@ -1,7 +1,10 @@
 import dotenv from "dotenv";
 import express from 'express';
 import winston from "winston";
+import { bakalariClientFactory } from "./src/bakalari/factroy";
+import { getStudentsByClass, writeGrades } from "./src/bakalari/students";
 import { moodleClientFactory } from './src/moodle/factory';
+import { calculateGrades, getLastTestNames, getStudentsByCourse, gradeableStudents, noteLastTestNames } from "./src/moodle/studetns";
 
 
 const app = express();
@@ -23,14 +26,12 @@ const moodleCreds = {
     logger: logger
 }
 
-
-
-// bude nahrazeno Bakalari API
-const studetns = [
-    "Roman Demeďuk",
-    "Barbora Lapuníková",
-    "Tobiáš Michalovský",
-]
+const bakalariCreds = {
+    wwwroot: dotenv.config().parsed?.BAKALARI_URL || "",
+    username: dotenv.config().parsed?.BAKALARI_USERNAME || "",
+    password: dotenv.config().parsed?.BAKALARI_PASSWORD || "",
+    logger: logger
+}
 
 // vrátí všechny funkce, které můžeme volat
 app.get('/', async (req, res) => {
@@ -52,15 +53,10 @@ app.get('/courses', async (req, res) => {
 
 // vrátí všechny uživatele v kurzu
 app.get('/usersInCourse/:courseId', async (req, res) => {
-    const params = req.params;
+    const courseId = req.params.courseId;
     const client = await moodleClientFactory(moodleCreds);
 
-    const info = await client.call({
-        wsfunction: "core_enrol_get_enrolled_users",
-        args: {
-            courseid: params.courseId
-        }
-    })
+    const info = await getStudentsByCourse(courseId, client);
 
     res.send(info);
 });
@@ -114,10 +110,29 @@ app.get('/test', async (req, res) => {
             courseid: 229
         }
     })
-    // console.log(await getStudentId({ firstname: "Barbora", lastname: "Lapuníková" }, 229));
     res.send(info);
 });
 
+
+app.get("/grade/:courseIds/:className", async (req, res) => {
+    const params = req.params;
+
+    const moodleClient = await moodleClientFactory(moodleCreds);
+    const bakalariClient = await bakalariClientFactory(bakalariCreds);
+
+    const moodleStudents = await getStudentsByCourse(params.courseIds, moodleClient);
+    const bakalariStudents = await getStudentsByClass(params.className);
+
+    const studentsToGrade = gradeableStudents(moodleStudents, bakalariStudents);
+
+    const grades = calculateGrades(studentsToGrade, params.courseIds.split("&"), moodleClient);
+    const lastTestNames = getLastTestNames(studentsToGrade);
+
+
+    noteLastTestNames(lastTestNames, params.courseIds.split("&"), moodleClient);
+
+    writeGrades(grades, bakalariClient);
+})
 
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);
