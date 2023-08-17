@@ -1,0 +1,6 @@
+1. Vybrat třídu a dostat jména studentů z Bakalářů (probrat API plugin s Vokounem)
+2. Zvoltit kurz (případně kapitolu kurzu), který se bude známkovat (vymyslet systém, který umožní vybrat 2-3 kurzy z důvodu konce tématu)
+3. Vytáhnout známky podle studenta (a rozdělit je podle kurzů)
+4. Oznámkovat
+5. Přidat komentář, který test byl poslední validní
+6. Zapsat známku do Bakalářů (probrat API plugin s Vokounem)
