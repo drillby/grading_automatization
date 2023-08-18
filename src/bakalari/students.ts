@@ -1,7 +1,30 @@
 import { bakalariStudent } from "../types/bakalari.types";
 
 export async function getStudentsByClass(className: string): Promise<bakalariStudent[]> {
-    throw new Error("Not implemented");
+    return [
+        {
+            id: 1,
+            firstname: "Patrik",
+            lastname: "Salaba",
+            class: "EP1B",
+            email: "test@example.com"
+        },
+        {
+            id: 2,
+            firstname: "Roman",
+            lastname: "Demeďuk",
+            class: "EP1B",
+            email: "test@example.com"
+        },
+        {
+            id: 3,
+            firstname: "Barbora",
+            lastname: "Lapuníková",
+            class: "EP1B",
+            email: "test@example.com"
+        },
+    ]
+    // throw new Error("Not implemented");
 }
 
 export function writeGrades(grades: { [fullname: string]: number }, client: any): void {
