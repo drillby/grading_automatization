@@ -1,6 +1,6 @@
 import { Client as MoodleClient } from "akora-moodle";
 import { bakalariStudent } from "../types/bakalari.types";
-import { MoodleStudent } from "../types/moodle.types";
+import { CourseActivity, CourseStructure, MoodleStudent } from "../types/moodle.types";
 
 // vrátí všechny studenty v kurzu
 export async function getStudentsByCourse(courseId: number | string, moodleSession: MoodleClient): Promise<MoodleStudent[]> {
@@ -33,8 +33,7 @@ export function gradeableStudents(moodleStudents: MoodleStudent[], BakalariStude
             BakalariStudent =>
                 BakalariStudent.firstname === moodleStudent.firstname &&
                 BakalariStudent.lastname === moodleStudent.lastname &&
-                BakalariStudent.class === moodleStudent.department &&
-                BakalariStudent.email === moodleStudent.email);
+                BakalariStudent.class === moodleStudent.department);
 
         if (correspondingBakalariStudent) {
             gradeableStudents.push(moodleStudent);
@@ -45,13 +44,33 @@ export function gradeableStudents(moodleStudents: MoodleStudent[], BakalariStude
 }
 
 export function calculateGrades(students: MoodleStudent[], courseIds: string[] | number[], client: MoodleClient): { [fullname: string]: number } {
-    throw new Error("Not implemented");
+    return {};
+    // throw new Error("Not implemented");
 }
 
 export function getLastTestNames(students: MoodleStudent[]): { [fullname: string]: string } {
-    throw new Error("Not implemented");
+    return {};
+    // throw new Error("Not implemented");
 }
 
 export function noteLastTestNames(lastTestNames: { [fullname: string]: string }, courseIds: string[] | number[], moodleSession: MoodleClient) {
-    throw new Error("Not implemented");
+    // throw new Error("Not implemented");
+}
+
+export async function getTestsFromCourse(courseId: string | number, moodleSession: MoodleClient): Promise<CourseStructure[]> {
+    const contents: CourseStructure[] = await moodleSession.call({
+        wsfunction: "core_course_get_contents",
+        args: {
+            courseid: Number(courseId)
+        }
+    })
+    return contents.slice(1);
+}
+
+export function getTestsFromCourseGroup(courseStructure: CourseStructure[], wantedGroup: string): CourseActivity[] {
+    for (const courseActivity of courseStructure) {
+        if (courseActivity.name.toLowerCase().includes(wantedGroup.toLowerCase())) {
+            return courseActivity.modules;
+        }
+    }
 }

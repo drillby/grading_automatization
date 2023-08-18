@@ -1,5 +1,6 @@
 import { bakalariCreds } from "../types/bakalari.types";
 
-export function bakalariClientFactory(creds: bakalariCreds): any {
-    throw new Error("Not implemented");
+export async function bakalariClientFactory(creds: bakalariCreds): Promise<any> {
+    return {}
+    // throw new Error("Not implemented");
 }

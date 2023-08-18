@@ -46,3 +46,39 @@ export type MoodleCreds = {
     password: string;
     logger?: winston.Logger;
 }
+
+export type CourseStructure = {
+    id: number;
+    name: string;
+    modules: CourseActivity[];
+}
+
+export type CourseActivity = {
+    id: number;
+    name: string;
+    instance: number;
+    contextid: number;
+    visible: number;
+    uservisible: number;
+    visibleoncoursepage: number;
+}
+
+export type UserGrade = {
+    usergrades: {
+        courseid: number;
+        courseidnumber: string;
+        userid: number;
+        userfullname: string;
+        useridnumber: string;
+        maxdepth: number;
+        gradeitems: GradeItem[];
+    }[]
+}
+
+export type GradeItem = {
+    id: number;
+    itemname: string;
+    itemtype: string;
+    graderaw: number | null;
+    grademax: number;
+}
