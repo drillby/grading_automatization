@@ -126,7 +126,7 @@ app.get('/test', async (req, res) => {
     res.send(info);
 });
 
-
+// vypočítá známky, které mají být zapsány do bakalářů (zatím pouze pro jeden kurz)
 app.get("/grade/:courseIds/:className", async (req, res) => {
     const params = req.params;
     const courses = params.courseIds.split("&");
