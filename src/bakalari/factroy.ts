@@ -1,4 +1,4 @@
-import { bakalariCreds } from "../types/bakalari.types";
+import { bakalariCreds } from "../types/bakalari";
 
 export async function bakalariClientFactory(creds: bakalariCreds): Promise<any> {
     return {}

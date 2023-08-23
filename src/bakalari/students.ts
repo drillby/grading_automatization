@@ -1,4 +1,4 @@
-import { bakalariStudent } from "../types/bakalari.types";
+import { bakalariStudent } from "../types/bakalari";
 
 export function getStudentsByClass(className: string): bakalariStudent[] {
     return [
@@ -28,5 +28,5 @@ export function getStudentsByClass(className: string): bakalariStudent[] {
 }
 
 export function writeGrades(grades: { [fullname: string]: number }, client: any): void {
-    // throw new Error("Not implemented");
+    throw new Error("Not implemented");
 }

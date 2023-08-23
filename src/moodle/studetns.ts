@@ -1,6 +1,6 @@
 import { Client as MoodleClient } from "akora-moodle";
-import { bakalariStudent } from "../types/bakalari.types";
-import { CourseActivity, CourseStructure, MoodleStudent } from "../types/moodle.types";
+import { bakalariStudent } from "../types/bakalari";
+import { CourseActivity, CourseStructure, MoodleStudent } from "../types/moodle";
 
 // vrátí všechny studenty v kurzu
 export async function getStudentsByCourse(courseId: number | string, moodleSession: MoodleClient): Promise<MoodleStudent[]> {
