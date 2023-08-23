@@ -1,16 +1,14 @@
+import axios from 'axios';
 import dotenv from "dotenv";
 import express from 'express';
 import winston from "winston";
-import { bakalariClientFactory } from "./src/bakalari/factroy";
 import { getStudentsByClass } from "./src/bakalari/students";
 import { moodleClientFactory } from './src/moodle/factory';
-import { getStudentsByCourse, getTestsFromCourse, getTestsFromCourseGroup, gradeableStudents } from "./src/moodle/studetns";
-import { UserGrade } from "./src/types/moodle.types";
+import { getStudentsByCourse, gradeableStudents } from "./src/moodle/studetns";
+import { MoodleStudent, UserGrades } from "./src/types/moodle";
 
-
-const app = express();
+export const app = express();
 const port = 3000;
-
 
 const logger = winston.createLogger({
     level: 'debug',
@@ -27,6 +25,8 @@ const moodleCreds = {
     logger: logger
 }
 
+export const moodleClient = moodleClientFactory(moodleCreds);
+
 const bakalariCreds = {
     wwwroot: dotenv.config().parsed?.BAKALARI_URL || "",
     username: dotenv.config().parsed?.BAKALARI_USERNAME || "",
@@ -41,8 +41,12 @@ const lastTestIds: { [id: number]: number | null } = {
     1830: null, // Barbora Lapuníková moodle id: id posledního splněného testu
 };
 
+app.get('/', (req, res) => {
+    res.json({ 'message': 'ok' });
+})
+
 // vrátí všechny funkce, které můžeme volat
-app.get('/', async (req, res) => {
+app.get('/all', async (req, res) => {
     const client = await moodleClientFactory(moodleCreds);
 
     const info = await client.core.getInfo()
@@ -116,9 +120,9 @@ app.get('/test', async (req, res) => {
         // core_enrol_get_enrolled_users [courseid] - získá všechny uživatele v kurzu
         // core_course_get_courses_by_field - info o všech kurzech
         // core_group_get_course_groups [courseid] - třídy v kurzu (Podrazký_2022_IT)
-        // core_group_get_course_groupings [courseid] - skupiny v kurzu (Mohou přeskočit ústní)
+        // core_group_get_course_groupings [courseid] - skupiny v kusrzu (Mohou přeskočit ústní)
         // core_course_get_contents [courseid] - dělení kurzu na sekce (Algoritmizace I, Algoritmizace II, ...)
-        wsfunction: "gradereport_user_get_grade_items",
+        wsfunction: "core_course_get_contents",
         args: {
             courseid: 229
         }
@@ -131,87 +135,46 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
     const params = req.params;
     const courses = params.courseIds.split("&");
 
-    // přihlášení
-    const moodleClient = await moodleClientFactory(moodleCreds);
-    const bakalariClient = await bakalariClientFactory(bakalariCreds);
-
     // dostanu studenty podle id kurzu (moodle)
-    const moodleStudents = await getStudentsByCourse(courses[0].split("_")[0], moodleClient)
+    for (const course of courses) {
+        const courseId = course.split("_")[0]
+        const courseTopic = course.split("_")[1]
 
-    // dostanu studenty podle třídy (bakaláři)
-    const bakalariStudents = getStudentsByClass(params.className);
+        // všichni studenti v kurzu
+        const moodleStudents: Promise<{ data: MoodleStudent[] }> = axios.get(`http://localhost:3000/moodle/students/${courseId}`);
+        // známky všech studentů v kurzu
+        const allGrades: Promise<{ data: { usergrades: UserGrades[] } }> = axios.get(`http://localhost:3000/moodle/grades/${courseId}`);
 
-    // dostanu studenty, kteří jsou v obou systémech (moodle i bakaláři)
-    const studentsToGrade = gradeableStudents(moodleStudents, bakalariStudents);
+        // ! TBD
+        // dostanu studenty podle třídy (bakaláři)
+        const bakalariStudents = getStudentsByClass(params.className);
 
-    // dostanu všechny testy v kurzu
-    const coueseId = courses[0].split("_")[0];
-    const allTests = await getTestsFromCourse(coueseId, moodleClient);
+        // dostanu studenty, kteří jsou v obou systémech (moodle i bakaláři)
+        const studentsToGrade = gradeableStudents((await moodleStudents).data, bakalariStudents);
 
-    // dostanu testy v kurzu podle tématu
-    const topicName = courses[0].split("_")[1];
-    const testsByGroup = getTestsFromCourseGroup(allTests, topicName);
 
-    // známky všech studentů v kurzu
-    const allGrades: UserGrade = await moodleClient.call({
-        wsfunction: "gradereport_user_get_grade_items",
-        args: {
-            courseid: 229
-        }
-    })
-
-    // filter známek jen pro studenty, kteří jsou v obou systémech
-    const filteredGrades = allGrades.usergrades.filter((grade) => {
-        return studentsToGrade.find((student) => {
-            return student.lastname + " " + student.firstname === grade.userfullname;
-        })
-    })
-
-    // ořízne první dvě aktivity (jedná se o sumarizaci)
-    filteredGrades.forEach((grade) => {
-        grade.gradeitems = grade.gradeitems.slice(2);
-    })
-
-    const grades = {};
-    for (const student of filteredGrades) {
-        grades[student.userid] = 5;
-    }
-
-    // vypočítá známky
-    for (const student of filteredGrades) {
-        const lastTestId = lastTestIds[student.userid];
-        // index odkud mám začít počítat známky
-        if (lastTestId) {
-            var index = student.gradeitems.findIndex((grade) => {
-                return grade.id === lastTestId;
+        const filteredStudents = (await allGrades).data.usergrades.filter((grade) => {
+            return studentsToGrade.find((student) => {
+                return student.id === grade.userid;
             })
-        }
-        else {
-            var index = 0;
-        }
-        // loop from index to end od student.gradeitems
-        for (var i = index; i <= student.gradeitems.length; i++) {
-            const grade = student.gradeitems[i];
-            if ((grade.itemname.includes("Ústní") || grade.itemname.includes("Očekávání")) &&
-                grade.graderaw >= grade.grademax) {
-                grades[student.userid] -= 0.5;
-            }
-            else if (grade.graderaw >= grade.grademax * 2) {
-                grades[student.userid] -= 1;
-            }
-            else if (grade.graderaw === null) {
-                lastTestIds[student.userid] = index = 0 ? null : student.gradeitems[i - 1].id;
-                break;
-            }
-        }
-        // ošetření, aby známka nebyla menší než 1
-        if (grades[student.userid] < 1) grades[student.userid] = 1;
-    }
+        })
 
-    // TODO: zapsat známky
-    // TODO: sprovoznit pro kontrolu více kurzů a témat najednou (teoreticky jenom přidat cyklus?)
-    res.send(grades);
+        // ořízne první dvě aktivity (jedná se o sumarizaci)
+        filteredStudents.forEach((grade) => {
+            grade.gradeitems = grade.gradeitems.slice(2);
+        })
+
+        // ve filteredStudents známky studentů
+        // z těch jsem schopen vypočítat známky, které mají být zapsány do bakalářů
+        // TODO: vypočítat známky
+        // TODO: zapsat známky
+        // ! musím si pamatovat kdy pro studenta skončil poslední blok testů (pokud ještě nesplnil všechny)
+    }
+    res.send("OK");
 })
+
+const moodleRouter = require('./src/routes/moodle.routes');
+app.use('/moodle', moodleRouter);
 
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);
