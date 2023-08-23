@@ -63,16 +63,14 @@ export type CourseActivity = {
     visibleoncoursepage: number;
 }
 
-export type UserGrade = {
-    usergrades: {
-        courseid: number;
-        courseidnumber: string;
-        userid: number;
-        userfullname: string;
-        useridnumber: string;
-        maxdepth: number;
-        gradeitems: GradeItem[];
-    }[]
+export type UserGrades = {
+    courseid: number;
+    courseidnumber: string;
+    userid: number;
+    userfullname: string;
+    useridnumber: string;
+    maxdepth: number;
+    gradeitems: GradeItem[];
 }
 
 export type GradeItem = {
