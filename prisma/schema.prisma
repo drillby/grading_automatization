@@ -11,15 +11,16 @@ datasource db {
 }
 
 model Student {
-  id                  Int                 @id @default(autoincrement())
+  id                  String              @id @default(uuid())
   moodleId            Int                 @unique
   bakalariId          Int                 @unique
+  class               String
   lastValidTestId     Int
   possiblyValidTestId PossiblyValidTest[]
 }
 
 model PossiblyValidTest {
-  id        Int      @id @default(autoincrement())
-  Student   Student? @relation(fields: [studentId], references: [id])
-  studentId Int?
+  id        Int     @id @default(autoincrement())
+  Student   Student @relation(fields: [studentId], references: [id])
+  studentId String
 }
