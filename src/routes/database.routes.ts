@@ -5,7 +5,7 @@ const databaseRouter = express.Router();
 
 const prisma = new PrismaClient()
 
-databaseRouter.get("/studetns/:className", async (req, res) => {
+databaseRouter.get("/students/:className", async (req, res) => {
     const className = req.params.className;
 
     const students = await prisma.student.findMany({
