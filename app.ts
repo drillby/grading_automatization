@@ -132,6 +132,12 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
         // ve filteredStudents známky studentů
         // z těch jsem schopen vypočítat známky, které mají být zapsány do bakalářů
         // TODO: vypočítat známky
+        // známkování si předstabuju takto:
+        // vytáhnu si studentsToGrade pro všechny kurzy(témata) a uložím si je do nějakého objektu
+        // klíčem bude id studenta a hodnotou pole gradeitems přes všechny kurzy(témata)
+        // pak cyklím přes všechny studenty a vypočítám známky
+
+
         // TODO: zapsat známky
         // ! musím si pamatovat kdy pro studenta skončil poslední blok testů (pokud ještě nesplnil všechny)
     }
