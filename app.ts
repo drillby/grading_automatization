@@ -89,7 +89,7 @@ app.get("/brute-force", async (req, res) => {
     const client = await moodleClientFactory(moodleCreds);
 
     const functions = (await client.core.getInfo()).functions;
-    const a = [];
+    const a: { name: string, versoin: string }[] = [];
 
     functions.map(async (f: { name: string, version: string }) => {
         try {
@@ -175,6 +175,9 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
 
 const moodleRouter = require('./src/routes/moodle.routes');
 app.use('/moodle', moodleRouter);
+
+const databaseRouter = require('./src/routes/database.routes');
+app.use('/database', databaseRouter);
 
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);
