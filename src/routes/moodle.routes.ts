@@ -13,7 +13,7 @@ moodleRouter.get("/students/:courseId", async (req, res) => {
         return;
     }
 
-    const students: Promise<MoodleStudent[]> = await (await moodleClient).call({
+    const students: MoodleStudent[] = await (await moodleClient).call({
         wsfunction: "core_enrol_get_enrolled_users",
         args: {
             courseid: courseId
@@ -31,7 +31,7 @@ moodleRouter.get("/grades/:courseId", async (req, res) => {
         return;
     }
 
-    const grades: Promise<{ usergrades: UserGrades[] }> = await (await moodleClient).call({
+    const grades: { usergrades: UserGrades[] } = await (await moodleClient).call({
         wsfunction: "gradereport_user_get_grade_items",
         args: {
             courseid: courseId
@@ -49,14 +49,14 @@ moodleRouter.get("/tests/:courseId", async (req, res) => {
         return;
     }
 
-    const tests: Promise<CourseStructure[]> = await (await moodleClient).call({
+    const tests: CourseStructure[] = await (await moodleClient).call({
         wsfunction: "core_course_get_contents",
         args: {
             courseid: Number(courseId)
         }
     })
 
-    res.send((await tests).slice(1));
+    res.send(tests.slice(1));
 });
 
 module.exports = moodleRouter;
