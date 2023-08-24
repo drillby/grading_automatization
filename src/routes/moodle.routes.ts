@@ -41,8 +41,9 @@ moodleRouter.get("/grades/:courseId", async (req, res) => {
     res.send(grades);
 });
 
-moodleRouter.get("/tests/:courseId", async (req, res) => {
+moodleRouter.get("/tests/:courseId/:topic", async (req, res) => {
     const courseId = Number(req.params.courseId);
+    const topic = req.params.topic;
 
     if (isNaN(courseId)) {
         res.status(400).send("Course id must be a number");
@@ -56,7 +57,13 @@ moodleRouter.get("/tests/:courseId", async (req, res) => {
         }
     })
 
-    res.send(tests.slice(1));
+    const topicTests = tests.find(test => test.name.includes(topic));
+
+    if (!topicTests) {
+        res.send({})
+    }
+
+    res.send(topicTests);
 });
 
 module.exports = moodleRouter;

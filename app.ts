@@ -4,8 +4,8 @@ import express from 'express';
 import winston from "winston";
 import { getStudentsByClass } from "./src/bakalari/students";
 import { moodleClientFactory } from './src/moodle/factory';
-import { getStudentsByCourse, gradeableStudents } from "./src/moodle/studetns";
-import { MoodleStudent, UserGrades } from "./src/types/moodle";
+import { gradeableStudents } from "./src/moodle/studetns";
+import { CourseStructure, MoodleStudent, UserGrades } from "./src/types/moodle";
 
 export const app = express();
 const port = 3000;
@@ -44,46 +44,6 @@ const lastTestIds: { [id: number]: number | null } = {
 app.get('/', (req, res) => {
     res.json({ 'message': 'ok' });
 })
-
-// vrátí všechny funkce, které můžeme volat
-app.get('/all', async (req, res) => {
-    const client = await moodleClientFactory(moodleCreds);
-
-    const info = await client.core.getInfo()
-
-    res.send(info);
-});
-
-// vrátí všechny kurzy
-app.get('/courses', async (req, res) => {
-    const client = await moodleClientFactory(moodleCreds);
-
-    const info = await client.core.getAllCourses()
-
-    res.send(info);
-});
-
-// vrátí všechny uživatele v kurzu
-app.get('/usersInCourse/:courseId', async (req, res) => {
-    const courseId = req.params.courseId;
-    const client = await moodleClientFactory(moodleCreds);
-
-    const info = await getStudentsByCourse(courseId, client);
-
-    res.send(info);
-});
-
-app.get('/gradesInCourse/:courseId', async (req, res) => {
-    const params = req.params;
-    const client = await moodleClientFactory(moodleCreds);
-
-    const info = await client.core.course.getContents({
-        courseid: Number(params.courseId)
-    })
-
-    res.send(info);
-});
-
 
 app.get("/brute-force", async (req, res) => {
     const client = await moodleClientFactory(moodleCreds);
@@ -144,25 +104,30 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
         const moodleStudents: Promise<{ data: MoodleStudent[] }> = axios.get(`http://localhost:3000/moodle/students/${courseId}`);
         // známky všech studentů v kurzu
         const allGrades: Promise<{ data: { usergrades: UserGrades[] } }> = axios.get(`http://localhost:3000/moodle/grades/${courseId}`);
+        // známkované testy
+        const topicContent: Promise<{ data: CourseStructure }> = axios.get(`http://localhost:3000/moodle/tests/${courseId}/${courseTopic}`);
 
         // ! TBD
         // dostanu studenty podle třídy (bakaláři)
         const bakalariStudents = getStudentsByClass(params.className);
 
         // dostanu studenty, kteří jsou v obou systémech (moodle i bakaláři)
-        const studentsToGrade = gradeableStudents((await moodleStudents).data, bakalariStudents);
+        const filteredStudents = gradeableStudents((await moodleStudents).data, bakalariStudents);
 
 
-        const filteredStudents = (await allGrades).data.usergrades.filter((grade) => {
-            return studentsToGrade.find((student) => {
-                return student.id === grade.userid;
-            })
-        })
+        // studenti a jejich známky v kurzu
+        const filteredStudentIds = new Set(filteredStudents.map(student => student.id));
+        const studentsToGrade = (await allGrades).data.usergrades.filter(grade => {
+            return filteredStudentIds.has(grade.userid);
+        });
 
-        // ořízne první dvě aktivity (jedná se o sumarizaci)
-        filteredStudents.forEach((grade) => {
-            grade.gradeitems = grade.gradeitems.slice(2);
-        })
+        // v studentsToGrade jsou pouze testy z daného tématu
+        const moduleIds = new Set((await topicContent).data.modules.map(module => module.id));
+        for (const student of studentsToGrade) {
+            student.gradeitems = student.gradeitems.filter(grade => moduleIds.has(grade.cmid));
+        }
+
+        console.log(studentsToGrade[0].gradeitems);
 
         // ve filteredStudents známky studentů
         // z těch jsem schopen vypočítat známky, které mají být zapsány do bakalářů

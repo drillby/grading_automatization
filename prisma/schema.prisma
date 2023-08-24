@@ -20,7 +20,7 @@ model Student {
 }
 
 model PossiblyValidTest {
-  id        Int     @id @default(autoincrement())
-  Student   Student @relation(fields: [studentId], references: [id])
-  studentId String
+  id        Int      @id @default(autoincrement())
+  Student   Student? @relation(fields: [studentId], references: [id])
+  studentId String?
 }

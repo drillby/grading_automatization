@@ -73,4 +73,5 @@ export function getTestsFromCourseGroup(courseStructure: CourseStructure[], want
             return courseActivity.modules;
         }
     }
+    return [];
 }

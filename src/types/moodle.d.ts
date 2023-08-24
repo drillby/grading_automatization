@@ -64,6 +64,7 @@ export type CourseActivity = {
 }
 
 export type UserGrades = {
+    itemmodule: number;
     courseid: number;
     courseidnumber: string;
     userid: number;
@@ -74,7 +75,7 @@ export type UserGrades = {
 }
 
 export type GradeItem = {
-    id: number;
+    cmid: number;
     itemname: string;
     itemtype: string;
     graderaw: number | null;
