@@ -1,11 +1,12 @@
+import { Student } from '@prisma/client';
 import axios from 'axios';
 import dotenv from "dotenv";
 import express from 'express';
 import winston from "winston";
-import { getStudentsByClass } from "./src/bakalari/students";
-import { moodleClientFactory } from './src/moodle/factory';
-import { gradeableStudents } from "./src/moodle/studetns";
 import { CourseStructure, MoodleStudent, UserGrades } from "./src/types/moodle";
+import { getStudentsByClass } from "./src/utils/bakalari/students";
+import { moodleClientFactory } from './src/utils/moodle/factory';
+import { gradeableStudents } from "./src/utils/moodle/studetns";
 
 export const app = express();
 const port = 3000;
@@ -95,6 +96,8 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
     const params = req.params;
     const courses = params.courseIds.split("&");
 
+    const finalGrades: { [bakalariId: number]: number }[] = [];
+
     // dostanu studenty podle id kurzu (moodle)
     for (const course of courses) {
         const courseId = course.split("_")[0]
@@ -106,6 +109,8 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
         const allGrades: Promise<{ data: { usergrades: UserGrades[] } }> = axios.get(`http://localhost:3000/moodle/grades/${courseId}`);
         // známkované testy
         const topicContent: Promise<{ data: CourseStructure }> = axios.get(`http://localhost:3000/moodle/tests/${courseId}/${courseTopic}`);
+        // studenti z databáze podle třídy
+        const databaseStudents: Promise<Student[]> = axios.get(`http://localhost:3000/database/students/${params.className}`);
 
         // ! TBD
         // dostanu studenty podle třídy (bakaláři)
@@ -113,7 +118,6 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
 
         // dostanu studenty, kteří jsou v obou systémech (moodle i bakaláři)
         const filteredStudents = gradeableStudents((await moodleStudents).data, bakalariStudents);
-
 
         // studenti a jejich známky v kurzu
         const filteredStudentIds = new Set(filteredStudents.map(student => student.id));
@@ -126,8 +130,6 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
         for (const student of studentsToGrade) {
             student.gradeitems = student.gradeitems.filter(grade => moduleIds.has(grade.cmid));
         }
-
-        console.log(studentsToGrade[0].gradeitems);
 
         // ve filteredStudents známky studentů
         // z těch jsem schopen vypočítat známky, které mají být zapsány do bakalářů
