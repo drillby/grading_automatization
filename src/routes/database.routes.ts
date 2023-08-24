@@ -14,6 +14,7 @@ databaseRouter.get("/students/:className", async (req, res) => {
         },
         select: {
             moodleId: true,
+            bakalariId: true,
             lastValidTestId: true,
         }
     })
