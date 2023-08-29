@@ -1,4 +1,5 @@
-import { bakalariStudent } from "../types/bakalari";
+import { bakalariStudent } from "../../types/bakalari";
+
 
 export function getStudentsByClass(className: string): bakalariStudent[] {
     return [
