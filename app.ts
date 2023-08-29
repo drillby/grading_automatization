@@ -96,7 +96,16 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
     const params = req.params;
     const courses = params.courseIds.split("&");
 
-    const finalGrades: { [bakalariId: number]: number }[] = [];
+    // studenti z databáze podle třídy
+    const databaseStudents: Promise<{ data: Student[] }> = axios.get(
+        `http://localhost:3000/database/students/${params.className}`);
+
+    const finalGrades: { [bakalariId: number]: number } = {};
+
+    // přednastavím všechny známky na 5
+    for (const student of (await databaseStudents).data) {
+        finalGrades[student.bakalariId] = 50;
+    }
 
     // dostanu studenty podle id kurzu (moodle)
     for (const course of courses) {
@@ -104,13 +113,14 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
         const courseTopic = course.split("_")[1]
 
         // všichni studenti v kurzu
-        const moodleStudents: Promise<{ data: MoodleStudent[] }> = axios.get(`http://localhost:3000/moodle/students/${courseId}`);
+        const moodleStudents: Promise<{ data: MoodleStudent[] }> = axios.get(
+            `http://localhost:3000/moodle/students/${courseId}`);
         // známky všech studentů v kurzu
-        const allGrades: Promise<{ data: { usergrades: UserGrades[] } }> = axios.get(`http://localhost:3000/moodle/grades/${courseId}`);
+        const allGrades: Promise<{ data: { usergrades: UserGrades[] } }> = axios.get(
+            `http://localhost:3000/moodle/grades/${courseId}`);
         // známkované testy
-        const topicContent: Promise<{ data: CourseStructure }> = axios.get(`http://localhost:3000/moodle/tests/${courseId}/${courseTopic}`);
-        // studenti z databáze podle třídy
-        const databaseStudents: Promise<{ data: Student[] }> = axios.get(`http://localhost:3000/database/students/${params.className}`);
+        const topicContent: Promise<{ data: CourseStructure }> = axios.get(
+            `http://localhost:3000/moodle/tests/${courseId}/${courseTopic}`);
 
         // ! TBD
         // dostanu studenty podle třídy (bakaláři)
@@ -131,17 +141,50 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
             student.gradeitems = student.gradeitems.filter(grade => moduleIds.has(grade.cmid));
         }
 
-        // ve filteredStudents známky studentů
-        // z těch jsem schopen vypočítat známky, které mají být zapsány do bakalářů
-        // TODO: vypočítat známky
-        // známkování si předstabuju takto:
-        // vytáhnu si studentsToGrade pro všechny kurzy(témata) a uložím si je do nějakého objektu
-        // klíčem bude id studenta a hodnotou pole gradeitems přes všechny kurzy(témata)
-        // pak cyklím přes všechny studenty a vypočítám známky
+        // počítání známek
+        // pro každého studenta
+        for (const student of studentsToGrade) {
+            // find if student.id is in databaseStudents (moodleId)
+            //kouknu se jestli je v databázi
+            const databaseStudent = (await databaseStudents).data.find(
+                dstudent => dstudent.moodleId === student.userid);
+            // pokud ne, tak ho přeskočím
+            if (databaseStudent === undefined) {
+                continue;
+            }
 
+            const grades = student.gradeitems;
 
+            let lastTestIndex = grades.findIndex(
+                grade => grade.cmid === databaseStudent.lastValidTestId)
+            if (lastTestIndex === -1) {
+                lastTestIndex = 0;
+            }
+
+            // pokud uložený index není v databázi, musíme projít všechny známky
+            for (let i = lastTestIndex; i < grades.length; i++) {
+                // pokud je známka null, tak ještě nebyla vyplněn test a končím cyklus
+                if (grades[i].graderaw === null) {
+                    break;
+                }
+
+                // pokud je ústní a splnil
+                if (grades[i].itemname.includes("Ústní") &&
+                    grades[i].graderaw == grades[i].grademax) {
+                    finalGrades[databaseStudent.bakalariId] =
+                        finalGrades[databaseStudent.bakalariId] - 5;
+                }
+                // pokud není ústní, dá se předpokládat, že je to test
+                // a pokud splnil
+                else if (grades[i].graderaw! >= grades[i].grademax * 2) {
+                    finalGrades[databaseStudent.bakalariId] =
+                        finalGrades[databaseStudent.bakalariId] - 10;
+                }
+            }
+        }
+
+        // nyní mám v finalGrades známky, které mají být zapsány do bakalářů
         // TODO: zapsat známky
-        // ! musím si pamatovat kdy pro studenta skončil poslední blok testů (pokud ještě nesplnil všechny)
     }
     res.send("OK");
 })
