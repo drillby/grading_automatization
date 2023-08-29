@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
+		"build": "npx tsc",
 		"start": "npx tsc && node dist/app.js",
 		"dev": "npx nodemon --watch '**/*.ts' --exec 'ts-node' app.ts",
 		"database": "npx prisma migrate dev && npx prisma generate"
