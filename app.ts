@@ -110,7 +110,7 @@ app.get("/grade/:courseIds/:className", async (req, res) => {
         // známkované testy
         const topicContent: Promise<{ data: CourseStructure }> = axios.get(`http://localhost:3000/moodle/tests/${courseId}/${courseTopic}`);
         // studenti z databáze podle třídy
-        const databaseStudents: Promise<Student[]> = axios.get(`http://localhost:3000/database/students/${params.className}`);
+        const databaseStudents: Promise<{ data: Student[] }> = axios.get(`http://localhost:3000/database/students/${params.className}`);
 
         // ! TBD
         // dostanu studenty podle třídy (bakaláři)
