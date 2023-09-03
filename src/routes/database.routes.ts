@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import express from 'express';
-import { requireAuth } from '../middleware/auth';
+import { requireAuthMiddleware } from '../middleware/auth';
 import { MoodleStudent } from '../types/moodle';
 import { getStudentsByClass } from '../utils/bakalari/students';
 
@@ -43,7 +43,7 @@ databaseRouter.get("/students/:className", async (req, res) => {
  * @param {string} className Název třídy (např. EP1B)
  * @returns {object} 200 - Objekt s informací o stavu indexace
 */
-databaseRouter.post("/index", requireAuth, async (req: express.Request, res: express.Response) => {
+databaseRouter.post("/index", requireAuthMiddleware, async (req: express.Request, res: express.Response) => {
     const courseId = req.body.courseId;
     const className = req.body.className;
 
@@ -89,7 +89,7 @@ databaseRouter.post("/index", requireAuth, async (req: express.Request, res: exp
     });
 })
 
-databaseRouter.delete("index", requireAuth, async (req, res) => {
+databaseRouter.delete("index", requireAuthMiddleware, async (req, res) => {
     await prisma.student.deleteMany({})
     prisma.$disconnect();
 

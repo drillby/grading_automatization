@@ -1,7 +1,7 @@
 import express from 'express';
 import { authorizationToken } from '../exports/creds';
 
-export function requireAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+export function requireAuthMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
     const token = req.headers.authorization
 
     if (!token) {

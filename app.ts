@@ -1,9 +1,15 @@
+import cors from 'cors';
 import express from 'express';
 import { moodleCreds } from './src/exports/creds';
+import { rateLimiterMiddleware } from './src/middleware/rateLimiter';
 import { moodleClientFactory } from './src/utils/moodle/factory';
 
 export const app = express();
 const port = 3000;
+
+app.use(cors());
+
+app.use(rateLimiterMiddleware);
 
 export const moodleClient = moodleClientFactory(moodleCreds);
 
