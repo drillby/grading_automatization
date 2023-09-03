@@ -25,7 +25,7 @@ export function getStudentId(studentName: { firstname: string, lastname: string 
     return -1;
 }
 
-export function gradeableStudents(moodleStudents: MoodleStudent[], BakalariStudent: bakalariStudent[]): MoodleStudent[] {
+export function commonStudents(moodleStudents: MoodleStudent[], BakalariStudent: bakalariStudent[]): MoodleStudent[] {
     const gradeableStudents: MoodleStudent[] = [];
 
     for (const moodleStudent of moodleStudents) {

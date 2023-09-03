@@ -3,7 +3,7 @@ import axios from 'axios';
 import express from 'express';
 import { CourseStructure, MoodleStudent, UserGrades } from '../types/moodle';
 import { getStudentsByClass } from '../utils/bakalari/students';
-import { gradeableStudents } from '../utils/moodle/studetns';
+import { commonStudents } from '../utils/moodle/studetns';
 
 const mainRouter = express.Router();
 
@@ -77,7 +77,7 @@ mainRouter.get("/grade/:courseIds/:className", async (req, res) => {
         const bakalariStudents = getStudentsByClass(params.className);
 
         // dostanu studenty, kteří jsou v obou systémech (moodle i bakaláři)
-        const filteredStudents = gradeableStudents((await moodleStudents).data, bakalariStudents);
+        const filteredStudents = commonStudents((await moodleStudents).data, bakalariStudents);
 
         // studenti a jejich známky v kurzu
         const filteredStudentIds = new Set(filteredStudents.map(student => student.id));
