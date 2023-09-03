@@ -10,8 +10,7 @@ const mainRouter = express.Router();
 /** 
  * @route GET /
  * @description Root route, vrací ok pokud server běží
- * @access Veřejný
- * @returns {object} 200 - Objekt s informací o stavu serveru
+ * @returns {[massage: string]: string} 200 - Objekt s informací o stavu serveru
  */
 mainRouter.get('/', (req, res) => {
     res.json({ 'message': 'ok' });
@@ -136,8 +135,14 @@ mainRouter.get("/grade/:courseIds/:className", async (req, res) => {
 
         // nyní mám v finalGrades známky, které mají být zapsány do bakalářů
         // TODO: zapsat známky
+        // TODO: zapsat poslední test do databáze
     }
-    res.send("OK");
+    res.send(
+        {
+            "message": "ok",
+            "finalGrades": finalGrades
+        }
+    );
 })
 
 module.exports = mainRouter;

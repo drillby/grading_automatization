@@ -8,7 +8,6 @@ const testRouter = express.Router();
 /**
  * @route GET /brute-force
  * @description Testovací route, vrací info o všech funkcích moodle API
- * @private Pouze pro testování
  * @returns {object} 200 - Objekt s odpovědí z API moodle (všech funkcí)
  * @todo Odstranit
  */
