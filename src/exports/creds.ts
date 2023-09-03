@@ -22,3 +22,5 @@ export const bakalariCreds = {
     password: dotenv.config().parsed?.BAKALARI_PASSWORD || "",
     logger: logger
 }
+
+export const authorizationToken = dotenv.config().parsed?.AUTHORIZATION_TOKEN || "";

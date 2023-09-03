@@ -1,6 +1,7 @@
 import { Student } from '@prisma/client';
 import axios from 'axios';
 import express from 'express';
+import { requireAuth } from '../middleware/auth';
 import { CourseStructure, MoodleStudent, UserGrades } from '../types/moodle';
 import { getStudentsByClass } from '../utils/bakalari/students';
 import { commonStudents } from '../utils/moodle/studetns';
@@ -42,7 +43,7 @@ mainRouter.get('/', (req, res) => {
  * 
  * Více informací zde: https://xeon.spskladno.cz/~podrazky/informace.html
  */
-mainRouter.get("/grade/:courseIds/:className", async (req, res) => {
+mainRouter.get("/grade/:courseIds/:className", requireAuth, async (req, res) => {
     const params = req.params;
     const courses = params.courseIds.split("&");
 
