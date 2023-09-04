@@ -1,7 +1,9 @@
+import bodyParser from 'body-parser';
+import cookkieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import path from 'path';
-import { moodleCreds } from './src/exports/creds';
+import { isProduction, moodleCreds } from './src/exports/creds';
 import { rateLimiterMiddleware } from './src/middleware/rateLimiter';
 import { moodleClientFactory } from './src/utils/moodle/factory';
 
@@ -12,7 +14,11 @@ app.use(cors());
 
 app.use(rateLimiterMiddleware);
 
-app.set("views", path.join(__dirname, "views"));
+app.use(cookkieParser());
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+app.set("views", path.join(__dirname, isProduction ? "dist" : "src", "views"));
 app.set("view engine", "ejs");
 
 export const moodleClient = moodleClientFactory(moodleCreds);

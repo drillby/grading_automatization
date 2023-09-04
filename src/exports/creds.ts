@@ -24,3 +24,5 @@ export const bakalariCreds = {
 }
 
 export const authorizationToken = dotenv.config().parsed?.AUTHORIZATION_TOKEN || "";
+
+export const isProduction = dotenv.config().parsed?.NODE_ENV === "production";

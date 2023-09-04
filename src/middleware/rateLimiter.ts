@@ -3,6 +3,7 @@ import rateLimiter from 'express-rate-limit';
 const allowList = [
     "127.0.0.1",
     "192.168.132.103",
+    "localhost",
 ]
 export const rateLimiterMiddleware = rateLimiter({
     windowMs: 1 * 60 * 1000, // 1 minute
