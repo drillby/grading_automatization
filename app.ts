@@ -1,5 +1,6 @@
 import cors from 'cors';
 import express from 'express';
+import path from 'path';
 import { moodleCreds } from './src/exports/creds';
 import { rateLimiterMiddleware } from './src/middleware/rateLimiter';
 import { moodleClientFactory } from './src/utils/moodle/factory';
@@ -10,6 +11,9 @@ const port = 3000;
 app.use(cors());
 
 app.use(rateLimiterMiddleware);
+
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
 export const moodleClient = moodleClientFactory(moodleCreds);
 
