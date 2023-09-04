@@ -18,16 +18,19 @@ app.set("view engine", "ejs");
 export const moodleClient = moodleClientFactory(moodleCreds);
 
 const mainRouter = require('./src/routes/main.routes');
-app.use('/', mainRouter);
+app.use('/api', mainRouter);
 
 const moodleRouter = require('./src/routes/moodle.routes');
-app.use('/moodle', moodleRouter);
+app.use('/api/moodle', moodleRouter);
 
 const databaseRouter = require('./src/routes/database.routes');
-app.use('/database', databaseRouter);
+app.use('/api/database', databaseRouter);
 
 const testRouter = require('./src/routes/test.routes');
-app.use('/test', testRouter);
+app.use('/api/test', testRouter);
+
+const viewsRouter = require('./src/routes/views.routes');
+app.use('/', viewsRouter);
 
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);
