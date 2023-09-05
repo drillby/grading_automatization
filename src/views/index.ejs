@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title><%= title %></title>
+		<title>Nadpis</title>
 		<script src="https://cdn.tailwindcss.com"></script>
 	</head>
 	<body>
@@ -12,18 +12,6 @@
 				<h1 class="text-4xl font-bold">Vyber třídu na oznámkování</h1>
 				<!-- create selector that can hold multiple values selected -->
 				<form action="/select" method="POST">
-					<select
-						name="classes"
-						id="classes"
-						class="mt-4 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-						multiple
-						required
-					>
-						<% for (let i = 0; i < classes.length; i++) { %>
-						<option value="<%= classes[i].id %>"><%= classes[i].name %></option>
-						<% } %>
-					</select>
-
 					<button
 						type="submit"
 						class="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"

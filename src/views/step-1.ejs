@@ -19,8 +19,8 @@
 						multiple
 						required
 					>
-						<% for (const class of classes) { %>
-						<option value="<%= class.id %>"><%= class.name %></option>
+						<% for (let i = 0; i < classes.length; i++) { %>
+						<option value="<%= classes[i].id %>"><%= classes[i].name %></option>
 						<% } %>
 					</select>
 					<button
