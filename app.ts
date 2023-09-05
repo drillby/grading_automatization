@@ -3,7 +3,7 @@ import cookkieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import path from 'path';
-import { isProduction, moodleCreds } from './src/exports/creds';
+import { isProduction, moodleCreds } from './src/exports';
 import { rateLimiterMiddleware } from './src/middleware/rateLimiter';
 import { moodleClientFactory } from './src/utils/moodle/factory';
 
@@ -12,7 +12,7 @@ const port = 3000;
 
 app.use(cors());
 
-app.use(rateLimiterMiddleware);
+isProduction ? app.use(rateLimiterMiddleware) : null;
 
 app.use(cookkieParser());
 

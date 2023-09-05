@@ -1,18 +1,16 @@
 import express from 'express';
+import { appTitle } from '../exports';
 
 const viewsRouter = express.Router();
 
 viewsRouter.get("/", (req, res) => {
     res.render("index", {
-        title: "Grading Automation",
+        title: appTitle,
     });
 })
 
-viewsRouter.post("/", (req, res) => {
-    res.redirect("/step-1");
-});
-
 viewsRouter.get("/step-1", (req, res) => {
+    res.cookie("invalidPass", undefined);
     if (req.cookies.classes) {
         res.redirect("/step-2");
     }
@@ -37,7 +35,7 @@ viewsRouter.get("/step-1", (req, res) => {
     ] // bude nahrazeno Bakaláří API
 
     res.render("step-1", {
-        title: "Grading Automation",
+        title: appTitle,
         classes: classes,
     });
 })
@@ -81,7 +79,7 @@ viewsRouter.get("/step-2", (req, res) => {
     ]
 
     res.render("step-2.ejs", {
-        title: "Grading Automation",
+        title: appTitle,
         courses: courses,
     });
 })
@@ -106,7 +104,7 @@ viewsRouter.get("/step-3", (req, res) => {
     // vypsat seznam témat na základě kurzů (cookies.courses)
 
     res.render("step-3.ejs", {
-        title: "Grading Automation",
+        title: appTitle,
     });
 })
 

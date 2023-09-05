@@ -26,3 +26,11 @@ export const bakalariCreds = {
 export const authorizationToken = dotenv.config().parsed?.AUTHORIZATION_TOKEN || "";
 
 export const isProduction = dotenv.config().parsed?.NODE_ENV === "production";
+
+export const allowList = [
+    "127.0.0.1",
+    "192.168.132.103",
+    "localhost",
+]
+
+export const appTitle = "Grading Automation";

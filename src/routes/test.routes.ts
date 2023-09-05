@@ -1,6 +1,6 @@
 import express from 'express';
 import { moodleClient } from '../../app';
-import { moodleCreds } from '../exports/creds';
+import { moodleCreds } from '../exports';
 import { moodleClientFactory } from '../utils/moodle/factory';
 
 const testRouter = express.Router();
