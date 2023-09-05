@@ -7,7 +7,7 @@ const allowList = [
 ]
 export const rateLimiterMiddleware = rateLimiter({
     windowMs: 1 * 60 * 1000, // 1 minute
-    max: 10, // limit each IP to 60 requests per windowMs
+    max: 0, // limit each IP to 60 requests per windowMs
     headers: true,
     message: {
         status: "error",

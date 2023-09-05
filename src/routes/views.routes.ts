@@ -2,6 +2,16 @@ import express from 'express';
 
 const viewsRouter = express.Router();
 
+viewsRouter.get("/", (req, res) => {
+    res.render("index", {
+        title: "Grading Automation",
+    });
+})
+
+viewsRouter.post("/", (req, res) => {
+    res.redirect("/step-1");
+});
+
 viewsRouter.get("/step-1", (req, res) => {
     if (req.cookies.classes) {
         res.redirect("/step-2");
@@ -36,6 +46,7 @@ viewsRouter.post("/step-1", (req, res) => {
     const classes = req.body.classes;
     res.cookie("classes", classes, {
         secure: true,
+        maxAge: 5 * 60 * 1000,
     });
 
     res.redirect("/step-2");
@@ -78,6 +89,7 @@ viewsRouter.get("/step-2", (req, res) => {
 viewsRouter.post("/step-2", (req, res) => {
     res.cookie("courses", req.body.courses, {
         secure: true,
+        maxAge: 5 * 60 * 1000
     });
 
     res.redirect("/step-3");
