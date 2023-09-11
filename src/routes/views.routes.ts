@@ -1,16 +1,44 @@
 import express from 'express';
-import { appTitle } from '../exports';
+import { appTitle, authorizationToken } from '../exports';
 
 const viewsRouter = express.Router();
 
 viewsRouter.get("/", (req, res) => {
+    let invalidPass = false;
+    if (req.cookies.invalidPass && req.cookies.invalidPass === "true") {
+        invalidPass = true;
+        res.clearCookie("invalidPass");
+    }
     res.render("index", {
         title: appTitle,
+        invalidPass: invalidPass,
     });
 })
 
+viewsRouter.post("/", (req, res) => {
+    const password = req.body.password;
+    if (password !== authorizationToken) {
+        res.cookie("invalidPass", true, {
+            secure: true,
+            maxAge: 5 * 60 * 1000,
+        });
+        res.redirect("/");
+        return;
+    }
+
+    res.cookie("validated", true, {
+        secure: true,
+        maxAge: 5 * 60 * 1000,
+    })
+
+    res.redirect("/step-1");
+})
+
 viewsRouter.get("/step-1", (req, res) => {
-    res.cookie("invalidPass", undefined);
+    if (!req.cookies.validated && req.cookies.validated !== "true") {
+        res.redirect("/");
+    }
+
     if (req.cookies.classes) {
         res.redirect("/step-2");
     }
@@ -51,6 +79,10 @@ viewsRouter.post("/step-1", (req, res) => {
 })
 
 viewsRouter.get("/step-2", (req, res) => {
+    if (!req.cookies.validated && req.cookies.validated !== "true") {
+        res.redirect("/");
+    }
+
     if (!req.cookies.classes) {
         res.redirect("/step-1");
     }
@@ -74,8 +106,13 @@ viewsRouter.get("/step-2", (req, res) => {
         },
         {
             id: 299,
-            name: "C++",
-        }
+            name: "C",
+        },
+        {
+            id: 227,
+            name: "Web",
+        },
+
     ]
 
     res.render("step-2.ejs", {
@@ -94,6 +131,10 @@ viewsRouter.post("/step-2", (req, res) => {
 })
 
 viewsRouter.get("/step-3", (req, res) => {
+    if (!req.cookies.validated && req.cookies.validated !== "true") {
+        res.redirect("/");
+    }
+
     if (!req.cookies.classes) {
         res.redirect("/step-1");
     }
@@ -109,6 +150,7 @@ viewsRouter.get("/step-3", (req, res) => {
 })
 
 viewsRouter.post("/step-3", (req, res) => {
+    res.clearCookie("validated");
 })
 
 

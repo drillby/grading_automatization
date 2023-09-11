@@ -12,7 +12,18 @@
 				<h1 class="text-4xl font-bold"><%= title %></h1>
 				<!-- create selector that can hold multiple values selected -->
 				<form action="/" method="POST">
-					<!-- create password input named "Heslo" -->
+					<!-- create error paragraph tag with "Špatné heslo" -->
+					<p class="text-red-500 mt-4 font-bold <%= invalidPass === true ? "visible" : "hidden" %>">
+						Špatné heslo
+					</p>
+					<input
+						type="password"
+						name="password"
+						id="password"
+						class="mt-4 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+						placeholder="Heslo"
+						required
+					/>
 					<button
 						type="submit"
 						class="mt-4 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
